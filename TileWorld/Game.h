@@ -37,12 +37,18 @@ private:
 
 	static constexpr int16_t halfTileWidth = (tileWidth / 2);
 	static constexpr int16_t halfTileHeight = (tileHeight / 2);
+	
+	static constexpr int16_t playerWidth = 16;
+	static constexpr int16_t playerHeight = 24;
+
+	static constexpr int16_t halfPlayerWidth = (playerWidth / 2);
+	static constexpr int16_t halfPlayerHeight = (playerHeight / 2);
 
 private:
 	Arduboy2 arduboy;
 	Map map;
 	Camera camera;
-	Entity playerEntity { centreScreenX, centreScreenY, 0, 0 };
+	Entity playerEntity { centreScreenX, 0, 0, 0 };
 
 public:
 	void setup()
@@ -118,10 +124,13 @@ public:
 
 	void drawPlayer()
 	{
-		const int16_t x = ((this->playerEntity.x - halfTileWidth) - this->camera.x);
-		const int16_t y = ((this->playerEntity.y - halfTileHeight) - this->camera.y);
+		constexpr int16_t playerDrawOffsetX = (halfTileWidth + (playerWidth - tileWidth));
+		constexpr int16_t playerDrawOffsetY = (halfTileHeight + (playerHeight - tileHeight));
+	
+		const int16_t x = ((this->playerEntity.x - playerDrawOffsetX) - this->camera.x);
+		const int16_t y = ((this->playerEntity.y - playerDrawOffsetY) - this->camera.y);
 
-		this->arduboy.fillRect(x, y, tileWidth, tileHeight, BLACK);
+		this->arduboy.fillRect(x, y, playerWidth, playerHeight, BLACK);
 	}
 
 	void updatePlayerPosition()
