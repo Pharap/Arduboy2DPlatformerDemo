@@ -112,7 +112,7 @@ public:
 		}
 
 		// Update the player's position
-		this->updatePlayerPosition();
+		this->updateEntityPosition(this->playerEntity);
 
 		// Figure out the new map position based on the player's current position
 		const int16_t newMapX = (this->playerEntity.x - centreScreenX);
@@ -133,11 +133,11 @@ public:
 		this->arduboy.fillRect(x, y, playerWidth, playerHeight, BLACK);
 	}
 
-	void updatePlayerPosition()
+	void updateEntityPosition(Entity & entity)
 	{
 		// Figure out the point that the player should be moving to
-		int16_t newX = (this->playerEntity.x + this->playerEntity.xVelocity);
-		int16_t newY = (this->playerEntity.y + this->playerEntity.yVelocity);
+		int16_t newX = (entity.x + entity.xVelocity);
+		int16_t newY = (entity.y + entity.yVelocity);
 
 		// Figure out the tile coordinate that the player should be moving to
 		const int16_t tileX = (newX / tileWidth);
@@ -208,8 +208,8 @@ public:
 
 		// Assign the player's new position
 		// Whilst preventing the position from going out of bounds
-		this->playerEntity.x = ((newX > halfTileHeight) ? newX : halfTileWidth);
-		this->playerEntity.y = ((newY > halfTileHeight) ? newY : halfTileHeight);
+		entity.x = ((newX > halfTileHeight) ? newX : halfTileWidth);
+		entity.y = ((newY > halfTileHeight) ? newY : halfTileHeight);
 	}
 
 	void renderGameplay()
