@@ -44,11 +44,18 @@ private:
 	static constexpr int16_t halfPlayerWidth = (playerWidth / 2);
 	static constexpr int16_t halfPlayerHeight = (playerHeight / 2);
 
+	static constexpr int16_t enemyWidth = tileWidth;
+	static constexpr int16_t enemyHeight = tileHeight;
+
+	static constexpr int16_t halfEnemyWidth = (enemyWidth / 2);
+	static constexpr int16_t halfEnemyHeight = (enemyHeight / 2);
+
 private:
 	Arduboy2 arduboy;
 	Map map;
 	Camera camera;
 	Entity playerEntity { centreScreenX, 0, 0, 0 };
+	Entity enemy { centreScreenX + (tileWidth * 8), 0, 0, 0};
 
 public:
 	void setup()
@@ -74,8 +81,8 @@ public:
 
 		this->arduboy.display();
 	}
-
-	void updateGameplay()
+	
+	void handleInput()
 	{
 		// Handle xVelocity
 		int16_t xVelocity = 0;
@@ -98,7 +105,10 @@ public:
 			if(this->playerEntity.yVelocity > 0)
 				this->playerEntity.yVelocity = -8;
 		}
-
+	}
+	
+	void updatePlayer()
+	{
 		// If player is jumping
 		if(this->playerEntity.yVelocity < 0)
 		{
@@ -113,24 +123,43 @@ public:
 
 		// Update the player's position
 		this->updateEntityPosition(this->playerEntity);
+	}
+	
+	void updateEnemy()
+	{
+		// Move towards the player
+		if (enemy.x < playerEntity.x)
+		{
+			enemy.xVelocity = movementSpeed;
+		}
+		else if (enemy.x > playerEntity.x)
+		{
+			enemy.xVelocity = -movementSpeed;
+		}
+		
+		// Apply gravity
+		this->enemy.yVelocity = gravitySpeed;
 
+		// Update the enemy's position
+		this->updateEntityPosition(this->enemy);
+	}
+	
+	void updateCamera()
+	{
 		// Figure out the new map position based on the player's current position
 		const int16_t newMapX = (this->playerEntity.x - centreScreenX);
 		const int16_t newMapY = (this->playerEntity.y - centreScreenY);
 
 		this->camera.x = ((newMapX < 0) ? 0 : newMapX);
-		this->camera.y = ((newMapY < 0) ? 0 : newMapY);
+		this->camera.y = ((newMapY < 0) ? 0 : newMapY);	
 	}
 
-	void drawPlayer()
+	void updateGameplay()
 	{
-		constexpr int16_t playerDrawOffsetX = (halfTileWidth + (playerWidth - tileWidth));
-		constexpr int16_t playerDrawOffsetY = (halfTileHeight + (playerHeight - tileHeight));
-	
-		const int16_t x = ((this->playerEntity.x - playerDrawOffsetX) - this->camera.x);
-		const int16_t y = ((this->playerEntity.y - playerDrawOffsetY) - this->camera.y);
-
-		this->arduboy.fillRect(x, y, playerWidth, playerHeight, BLACK);
+		this->handleInput();
+		this->updatePlayer();
+		this->updateEnemy();
+		this->updateCamera();
 	}
 
 	void updateEntityPosition(Entity & entity)
@@ -212,6 +241,28 @@ public:
 		entity.y = ((newY > halfTileHeight) ? newY : halfTileHeight);
 	}
 
+	void drawPlayer()
+	{
+		constexpr int16_t playerDrawOffsetX = (halfTileWidth + (playerWidth - tileWidth));
+		constexpr int16_t playerDrawOffsetY = (halfTileHeight + (playerHeight - tileHeight));
+	
+		const int16_t x = ((this->playerEntity.x - playerDrawOffsetX) - this->camera.x);
+		const int16_t y = ((this->playerEntity.y - playerDrawOffsetY) - this->camera.y);
+
+		this->arduboy.fillRect(x, y, playerWidth, playerHeight, BLACK);
+	}
+
+	void drawEnemy()
+	{
+		constexpr int16_t enemyDrawOffsetX = (halfTileWidth + (enemyWidth - tileWidth));
+		constexpr int16_t enemyDrawOffsetY = (halfTileHeight + (enemyHeight - tileHeight));
+	
+		const int16_t x = ((this->enemy.x - enemyDrawOffsetX) - this->camera.x);
+		const int16_t y = ((this->enemy.y - enemyDrawOffsetY) - this->camera.y);
+
+		this->arduboy.fillRect(x, y, enemyWidth, enemyHeight, BLACK);
+	}
+
 	void renderGameplay()
 	{
 		// Draw map
@@ -219,6 +270,9 @@ public:
 
 		// Draw player
 		this->drawPlayer();
+		
+		// Draw enemy
+		this->drawEnemy();
 
 		// Print camera position
 		this->arduboy.print(this->camera.x);
