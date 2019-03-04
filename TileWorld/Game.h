@@ -25,6 +25,7 @@
 #include "WorldData.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "Images.h"
 
 class Game
 {
@@ -38,8 +39,8 @@ private:
 	static constexpr int16_t halfTileWidth = (tileWidth / 2);
 	static constexpr int16_t halfTileHeight = (tileHeight / 2);
 	
-	static constexpr int16_t playerWidth = 16;
-	static constexpr int16_t playerHeight = 24;
+	static constexpr int16_t playerWidth = Images::pandaWidth;
+	static constexpr int16_t playerHeight = Images::pandaHeight;
 
 	static constexpr int16_t halfPlayerWidth = (playerWidth / 2);
 	static constexpr int16_t halfPlayerHeight = (playerHeight / 2);
@@ -249,7 +250,8 @@ public:
 		const int16_t x = ((this->playerEntity.x - playerDrawOffsetX) - this->camera.x);
 		const int16_t y = ((this->playerEntity.y - playerDrawOffsetY) - this->camera.y);
 
-		this->arduboy.fillRect(x, y, playerWidth, playerHeight, BLACK);
+		this->arduboy.fillRect(x, y, playerWidth, playerHeight, WHITE);
+		Sprites::drawErase(x, y, Images::panda, 0);
 	}
 
 	void drawEnemy()
