@@ -50,13 +50,19 @@ private:
 
 	static constexpr int16_t halfEnemyWidth = (enemyWidth / 2);
 	static constexpr int16_t halfEnemyHeight = (enemyHeight / 2);
+	
+	static constexpr uint8_t enemyCount = 2;
 
 private:
 	Arduboy2 arduboy;
 	Map map;
 	Camera camera;
 	Entity playerEntity { centreScreenX, 0, 0, 0 };
-	Entity enemy { centreScreenX + (tileWidth * 8), 0, 0, 0};
+	Entity enemies[enemyCount]
+	{
+		{ centreScreenX + (tileWidth * 8), 0, 0, 0 },
+		{ centreScreenX + (tileWidth * 10), 0, 0, 0 },
+	};
 
 public:
 	void setup()
@@ -126,7 +132,7 @@ public:
 		this->updateEntityPosition(this->playerEntity);
 	}
 	
-	void updateEnemy()
+	void updateEnemy(Entity & enemy)
 	{
 		// Move towards the player
 		if (enemy.x < playerEntity.x)
@@ -139,10 +145,18 @@ public:
 		}
 		
 		// Apply gravity
-		this->enemy.yVelocity = gravitySpeed;
+		enemy.yVelocity = gravitySpeed;
 
 		// Update the enemy's position
-		this->updateEntityPosition(this->enemy);
+		this->updateEntityPosition(enemy);
+	}
+	
+	void updateEnemies()
+	{
+		for(uint8_t index = 0; index < enemyCount; ++index)
+		{
+			this->updateEnemy(this->enemies[index]);
+		}
 	}
 	
 	void updateCamera()
@@ -159,7 +173,7 @@ public:
 	{
 		this->handleInput();
 		this->updatePlayer();
-		this->updateEnemy();
+		this->updateEnemies();
 		this->updateCamera();
 	}
 
@@ -254,15 +268,23 @@ public:
 		Sprites::drawErase(x, y, Images::panda, 0);
 	}
 
-	void drawEnemy()
+	void drawEnemy(Entity & enemy)
 	{
 		constexpr int16_t enemyDrawOffsetX = (halfTileWidth + (enemyWidth - tileWidth));
 		constexpr int16_t enemyDrawOffsetY = (halfTileHeight + (enemyHeight - tileHeight));
 	
-		const int16_t x = ((this->enemy.x - enemyDrawOffsetX) - this->camera.x);
-		const int16_t y = ((this->enemy.y - enemyDrawOffsetY) - this->camera.y);
+		const int16_t x = ((enemy.x - enemyDrawOffsetX) - this->camera.x);
+		const int16_t y = ((enemy.y - enemyDrawOffsetY) - this->camera.y);
 
 		this->arduboy.fillRect(x, y, enemyWidth, enemyHeight, BLACK);
+	}
+
+	void drawEnemies()
+	{
+		for(uint8_t index = 0; index < enemyCount; ++index)
+		{
+			this->drawEnemy(this->enemies[index]);
+		}
 	}
 
 	void renderGameplay()
@@ -273,8 +295,8 @@ public:
 		// Draw player
 		this->drawPlayer();
 		
-		// Draw enemy
-		this->drawEnemy();
+		// Draw enemies
+		this->drawEnemies();
 
 		// Print camera position
 		this->arduboy.print(this->camera.x);
