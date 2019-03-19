@@ -268,7 +268,7 @@ public:
 		Sprites::drawErase(x, y, Images::panda, 0);
 	}
 
-	void drawEnemy(Entity & enemy)
+	void drawEnemy(const Entity & enemy)
 	{
 		constexpr int16_t enemyDrawOffsetX = (halfTileWidth + (enemyWidth - tileWidth));
 		constexpr int16_t enemyDrawOffsetY = (halfTileHeight + (enemyHeight - tileHeight));
